@@ -3,29 +3,31 @@
 //
 
 #include "mycallback.h"
+#include <unordered_map>
 #include <mqtt/async_client.h>
 #include <memory>
-#include "client.h"
+#include "Client.h"
 
 
 
 
-client::client(std::string server_address, std::string client_id) : cli(server_address, client_id),
+Client::Client(std::string server_address, std::string client_id) :
+cli(server_address, client_id),
 QOS(1),
-publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
-connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()){
+proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
+connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()),
+proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true)){
 
 
-    subscribe_topic = std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true);
 
     cli.set_callback(cb);
 }
 
-client::~client() {
+Client::~Client() {
     disconnect();
 }
 
-CONNECTION_STATUS client::connect() {
+CONNECTION_STATUS Client::connect() {
 
     try {
 
@@ -38,9 +40,9 @@ CONNECTION_STATUS client::connect() {
     }
 }
 
-CONNECTION_STATUS client::subscribe() {
+CONNECTION_STATUS Client::proxy_subscribe() {
     try {
-        subscribe_topic->subscribe()->wait();
+        proxy_subscribe_topic->subscribe()->wait();
         std::cout << "Subscribed" << std::endl;
         return CONNECTION_STATUS::SUCCESS;
     }
@@ -50,9 +52,9 @@ CONNECTION_STATUS client::subscribe() {
     }
 }
 
-CONNECTION_STATUS client::publish(const std::string& payload) {
+CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
     try {
-        publish_topic->publish(payload);
+        proxy_publish_topic->publish(payload);
         return CONNECTION_STATUS::SUCCESS;
     }
     catch (const mqtt::exception &exc) {
@@ -61,7 +63,7 @@ CONNECTION_STATUS client::publish(const std::string& payload) {
     }
 }
 
- CONNECTION_STATUS client::disconnect() {
+ CONNECTION_STATUS Client::disconnect() {
     try {
         cli.disconnect()->wait();
         return CONNECTION_STATUS::SUCCESS;
@@ -72,58 +74,133 @@ CONNECTION_STATUS client::publish(const std::string& payload) {
     }
 }
 
-std::string client::get_message() const {
+std::string Client::get_message() const {
    std::string payload = cb.payload;
     return payload;
 }
 
-CONNECTION_STATUS client::start_client() {
+
+
+
+
+
+CONNECTION_STATUS Client::start_client() {
     if (connect() == CONNECTION_STATUS::FAILURE) {
         std::cout << "connection failed" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
-    if (subscribe() == CONNECTION_STATUS::FAILURE) {
+    if (proxy_subscribe() == CONNECTION_STATUS::FAILURE) {
         std::cout << "subscription failed" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
+    for (auto& v2v_topic_pair: v2v_subscribed_topics) {
+        if (v2v_subscribe(v2v_topic_pair.first) == CONNECTION_STATUS::FAILURE) {
+            std::cout << "subscription failed of " << v2v_topic_pair.first <<  std::endl;
+            return CONNECTION_STATUS::FAILURE;
+        }
+
+    }
+
+
 
     return CONNECTION_STATUS::SUCCESS;
 }
 
+CONNECTION_STATUS Client::v2v_publish(const std::string topic_name, const std::string &payload) {
 
-void client::set_connOpts(const mqtt::connect_options &connOpts) {
+    try {
+        v2v_published_topics[topic_name]->publish(payload);
+        return CONNECTION_STATUS::SUCCESS;
+    }
+    catch (const mqtt::exception &exc) {
+        std::cerr << exc.what() << std::endl;
+        return CONNECTION_STATUS::FAILURE;
+    }
 
-    client::connOpts = connOpts;
 }
 
-const mqtt::connect_options &client::get_connOpts() const {
+CONNECTION_STATUS Client::v2v_subscribe(const std::string topic_name) {
+
+    try {
+        v2v_subscribed_topics[topic_name]->subscribe()->wait();
+        std::cout << "Subscribed" << std::endl;
+        return CONNECTION_STATUS::SUCCESS;
+    }
+    catch (const mqtt::exception &exc) {
+        std::cerr << exc.what() << std::endl;
+        return CONNECTION_STATUS::FAILURE;
+    }
+
+}
+
+
+
+void Client::add_v2v_subscribed_topic(std::string topic_name) {
+
+       std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
+
+       //move is used here because the unique_ptr can't be copied, we only transfer the ownership
+       v2v_subscribed_topics.insert(std::make_pair(topic_name, std::move(new_topic)));
+
+}
+
+void Client::add_v2v_published_topic(std::string topic_name) {
+
+    std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
+
+    //move is used here because the unique_ptr can't be copied, we only transfer the ownership
+    v2v_published_topics.insert(std::make_pair(topic_name, std::move(new_topic)));
+
+}
+
+
+void Client::remove_v2v_subscribed_topic(std::string topic) {
+
+    v2v_subscribed_topics.erase(topic);
+
+}
+
+
+void Client::remove_v2v_published_topic(std::string topic) {
+
+    v2v_published_topics.erase(topic);
+
+}
+
+
+void Client::set_connOpts(const mqtt::connect_options &connOpts) {
+
+    Client::connOpts = connOpts;
+}
+
+const mqtt::connect_options &Client::get_connOpts() const {
     return connOpts;
 }
 
-void client::set_publish_topic(std::string topic) {
-    publish_topic = std::make_unique<mqtt::topic>(mqtt::topic(cli, topic, QOS, true));
+void Client::set_publish_topic(std::string topic) {
+    proxy_publish_topic = std::make_unique<mqtt::topic>(mqtt::topic(cli, topic, QOS, true));
 
 }
 
-   void client::set_subscriber_topic(std::string topic) {
-       subscribe_topic = std::make_unique<mqtt::topic>(cli, topic, QOS, true);
+   void Client::set_subscriber_topic(std::string topic) {
+       proxy_subscribe_topic = std::make_unique<mqtt::topic>(cli, topic, QOS, true);
    }
 
-void client::set_qos(int QOS) {
+void Client::set_qos(int QOS) {
     this->QOS = QOS;
 }
 
 
-int client::get_qos() const {
+int Client::get_qos() const {
     return QOS;
 }
 
-const std::unique_ptr<mqtt::topic> &client::getPublishTopic() const {
-    return publish_topic;
+const std::unique_ptr<mqtt::topic> &Client::getPublishTopic() const {
+    return proxy_publish_topic;
 }
 
-const std::unique_ptr<mqtt::topic> &client::getSubscribeTopic() const {
-    return subscribe_topic;
+const std::unique_ptr<mqtt::topic> &Client::getSubscribeTopic() const {
+    return proxy_subscribe_topic;
 }
 
 

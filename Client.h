@@ -19,19 +19,19 @@ enum class CONNECTION_STATUS {SUCCESS, FAILURE};
 /**
  * @brief Represents an MQTT client with simplified configuration, functionality and default values for the rpi project.
  */
-class client {
+class Client {
 public:
     /**
      * @brief Constructor for the MQTT client, sets some default values.
      * @param server_address The address of the MQTT server.
      * @param client_id The unique identifier for this client.
      */
-    client(std::string server_address, std::string client_id);
+    Client(std::string server_address, std::string client_id);
 
     /**
      * @brief Destructor for the MQTT client. Disconnects the client.
      */
-    ~client();
+    ~Client();
 
     /**
      * @brief Establishes a connection to the MQTT broker.
@@ -43,14 +43,14 @@ public:
      * @brief Subscribes to the default MQTT topics.
      * @return Status of the subscription attempt.
      */
-    CONNECTION_STATUS subscribe();
+    CONNECTION_STATUS proxy_subscribe();
 
     /**
      * @brief Publishes a message to the default MQTT topic.
      * @param payload The message to be published.
      * @return Status of the publishing attempt.
      */
-    CONNECTION_STATUS publish(const std::string& payload);
+    CONNECTION_STATUS proxy_publish(const std::string& payload);
 
     /**
      * @brief Disconnects the client from the MQTT broker.
@@ -63,6 +63,52 @@ public:
      * @return Status of the client start attempt.
      */
     CONNECTION_STATUS start_client();
+
+    /**
+     * @brief  publish a message to a specific topic
+     * @param topic_name The topic to be published to.
+     * @param payload The message to be published.
+     */
+
+    CONNECTION_STATUS v2v_publish(const std::string topic_name ,const std::string& payload);
+
+
+    /**
+     * @brief  subscribe to a specific topic
+     * @param topic_name The topic to be subscribed to.
+     */
+
+     CONNECTION_STATUS v2v_subscribe(const std::string topic_name);
+
+
+
+    /**
+     * @brief Adds a topic to the list of subscribed V2V topics.
+     * @param topic_name The topic to be added.
+     */
+
+    void add_v2v_subscribed_topic(std::string topic_name);
+
+    /**
+     * @brief Adds a topic to the list of published V2V topics.
+     * @param topic_name The topic to be added.
+     */
+
+    void add_v2v_published_topic(std::string topic_name);
+
+    /**
+     * @brief Removes a topic from the list of subscribed V2V topics.
+     * @param topic The topic to be removed.
+     */
+    void remove_v2v_subscribed_topic(std::string topic);
+
+
+    /**
+     * @brief Removes a topic from the list of published V2V topics.
+     * @param topic The topic to be removed.
+     */
+    void remove_v2v_published_topic(std::string topic);
+
 
     /**
      * @brief Retrieves the last received message.
@@ -122,8 +168,11 @@ private:
     mycallback cb; ///< Callback handler for MQTT events.
     mqtt::async_client cli; ///< The underlying Paho MQTT client.
     int QOS; ///< Quality of Service level.
-    std::unique_ptr<mqtt::topic> publish_topic; ///< MQTT topic for publishing.
-    std::unique_ptr<mqtt::topic> subscribe_topic; ///< MQTT topic for subscribing.
+
+    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> v2v_subscribed_topics; ///MQTT subscribed V2V topics.
+    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> v2v_published_topics; ///MQTT published V2V topics.
+    std::unique_ptr<mqtt::topic> proxy_publish_topic; ///< MQTT topic for publishing.
+    std::unique_ptr<mqtt::topic> proxy_subscribe_topic; ///< MQTT topic for subscribing.
     mqtt::connect_options connOpts; ///< MQTT connection options.
 };
 
