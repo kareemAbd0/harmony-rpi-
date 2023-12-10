@@ -3,7 +3,6 @@
 //
 
 #include "mycallback.h"
-#include <unordered_map>
 #include <mqtt/async_client.h>
 #include <memory>
 #include "Client.h"
@@ -11,7 +10,7 @@
 
 
 
-Client::Client(std::string server_address, std::string client_id) :
+Client::Client(const std::string& server_address, const std::string& client_id) :
 cli(server_address, client_id),
 QOS(1),
 proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
@@ -43,7 +42,7 @@ CONNECTION_STATUS Client::connect() {
 CONNECTION_STATUS Client::proxy_subscribe() {
     try {
         proxy_subscribe_topic->subscribe()->wait();
-        std::cout << "Subscribed" << std::endl;
+        std::cout << "Subscribed proxy" << std::endl;
         return CONNECTION_STATUS::SUCCESS;
     }
     catch (const mqtt::exception &exc) {
@@ -74,6 +73,8 @@ CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
     }
 }
 
+
+//needs removal,should be async with call back only
 std::string Client::get_message() const {
    std::string payload = cb.payload;
     return payload;
@@ -90,10 +91,10 @@ CONNECTION_STATUS Client::start_client() {
         return CONNECTION_STATUS::FAILURE;
     }
     if (proxy_subscribe() == CONNECTION_STATUS::FAILURE) {
-        std::cout << "subscription failed" << std::endl;
+        std::cout << "subscription failed of proxy" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
-    for (auto& v2v_topic_pair: v2v_subscribed_topics) {
+    for (auto&& v2v_topic_pair: v2v_subscribed_topics) {
         if (v2v_subscribe(v2v_topic_pair.first) == CONNECTION_STATUS::FAILURE) {
             std::cout << "subscription failed of " << v2v_topic_pair.first <<  std::endl;
             return CONNECTION_STATUS::FAILURE;
@@ -106,7 +107,7 @@ CONNECTION_STATUS Client::start_client() {
     return CONNECTION_STATUS::SUCCESS;
 }
 
-CONNECTION_STATUS Client::v2v_publish(const std::string topic_name, const std::string &payload) {
+CONNECTION_STATUS Client::v2v_publish(const std::string& topic_name, const std::string &payload) {
 
     try {
         v2v_published_topics[topic_name]->publish(payload);
@@ -119,7 +120,7 @@ CONNECTION_STATUS Client::v2v_publish(const std::string topic_name, const std::s
 
 }
 
-CONNECTION_STATUS Client::v2v_subscribe(const std::string topic_name) {
+CONNECTION_STATUS Client::v2v_subscribe(const std::string& topic_name) {
 
     try {
         v2v_subscribed_topics[topic_name]->subscribe()->wait();
@@ -135,7 +136,7 @@ CONNECTION_STATUS Client::v2v_subscribe(const std::string topic_name) {
 
 
 
-void Client::add_v2v_subscribed_topic(std::string topic_name) {
+void Client::add_v2v_subscribed_topic(const std::string& topic_name) {
 
        std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
 
@@ -144,7 +145,7 @@ void Client::add_v2v_subscribed_topic(std::string topic_name) {
 
 }
 
-void Client::add_v2v_published_topic(std::string topic_name) {
+void Client::add_v2v_published_topic(const std::string& topic_name) {
 
     std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
 
@@ -154,14 +155,14 @@ void Client::add_v2v_published_topic(std::string topic_name) {
 }
 
 
-void Client::remove_v2v_subscribed_topic(std::string topic) {
+void Client::remove_v2v_subscribed_topic(const std::string& topic) {
 
     v2v_subscribed_topics.erase(topic);
 
 }
 
 
-void Client::remove_v2v_published_topic(std::string topic) {
+void Client::remove_v2v_published_topic(const std::string& topic) {
 
     v2v_published_topics.erase(topic);
 
@@ -177,12 +178,12 @@ const mqtt::connect_options &Client::get_connOpts() const {
     return connOpts;
 }
 
-void Client::set_publish_topic(std::string topic) {
+void Client::set_publish_topic(const std::string& topic) {
     proxy_publish_topic = std::make_unique<mqtt::topic>(mqtt::topic(cli, topic, QOS, true));
 
 }
 
-   void Client::set_subscriber_topic(std::string topic) {
+   void Client::set_subscriber_topic(const std::string& topic) {
        proxy_subscribe_topic = std::make_unique<mqtt::topic>(cli, topic, QOS, true);
    }
 

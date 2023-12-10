@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(PahoMqttCpp REQUIRED)
 add_executable(harmony_rpi main.cpp
-        client.cpp
+        Client.cpp
         Client.h
         mycallback.cpp
         mycallback.h)

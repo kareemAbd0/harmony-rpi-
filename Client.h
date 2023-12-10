@@ -8,6 +8,7 @@
 
 
 
+#include <unordered_map>
 
 
 const std::string SERVER_ADDRESS{ "tcp://localhost:1883"};
@@ -26,7 +27,7 @@ public:
      * @param server_address The address of the MQTT server.
      * @param client_id The unique identifier for this client.
      */
-    Client(std::string server_address, std::string client_id);
+    Client(const std::string& server_address, const std::string& client_id);
 
     /**
      * @brief Destructor for the MQTT client. Disconnects the client.
@@ -70,7 +71,7 @@ public:
      * @param payload The message to be published.
      */
 
-    CONNECTION_STATUS v2v_publish(const std::string topic_name ,const std::string& payload);
+    CONNECTION_STATUS v2v_publish(const std::string& topic_name ,const std::string& payload);
 
 
     /**
@@ -78,7 +79,7 @@ public:
      * @param topic_name The topic to be subscribed to.
      */
 
-     CONNECTION_STATUS v2v_subscribe(const std::string topic_name);
+     CONNECTION_STATUS v2v_subscribe(const std::string& topic_name);
 
 
 
@@ -87,27 +88,27 @@ public:
      * @param topic_name The topic to be added.
      */
 
-    void add_v2v_subscribed_topic(std::string topic_name);
+    void add_v2v_subscribed_topic(const std::string& topic_name);
 
     /**
      * @brief Adds a topic to the list of published V2V topics.
      * @param topic_name The topic to be added.
      */
 
-    void add_v2v_published_topic(std::string topic_name);
+    void add_v2v_published_topic(const std::string& topic_name);
 
     /**
      * @brief Removes a topic from the list of subscribed V2V topics.
      * @param topic The topic to be removed.
      */
-    void remove_v2v_subscribed_topic(std::string topic);
+    void remove_v2v_subscribed_topic(const std::string& topic);
 
 
     /**
      * @brief Removes a topic from the list of published V2V topics.
      * @param topic The topic to be removed.
      */
-    void remove_v2v_published_topic(std::string topic);
+    void remove_v2v_published_topic(const std::string& topic);
 
 
     /**
@@ -132,13 +133,13 @@ public:
      * @brief Sets the MQTT topic for publishing.
      * @param topic The MQTT topic for publishing.
      */
-    void set_publish_topic(std::string topic);
+    void set_publish_topic(const std::string& topic);
 
     /**
      * @brief Sets the MQTT topic for subscribing.
      * @param topic The MQTT topic for subscribing.
      */
-    void set_subscriber_topic(std::string topic);
+    void set_subscriber_topic(const std::string& topic);
 
     /**
      * @brief Sets the Quality of Service (QoS) level.
