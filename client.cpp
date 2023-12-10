@@ -10,19 +10,14 @@
 
 
 
-client::client(std::string server_address, std::string client_id) : cli(server_address, client_id) {
+client::client(std::string server_address, std::string client_id) : cli(server_address, client_id),
+QOS(1),
+publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
+connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()){
 
-    //set up the default data
-     QOS = 1;
-     publish_topic = std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true);
-     subscribe_topic = std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true);
 
-     connOpts = mqtt::connect_options_builder()
-            .clean_session()
-            .will(mqtt::message("last", "bye!", 5, 1, true))
-            .keep_alive_interval(std::chrono::seconds(60))  // Set the keep alive interval to 60 seconds
-            .finalize();
-    //set up the callback
+    subscribe_topic = std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true);
+
     cli.set_callback(cb);
 }
 
