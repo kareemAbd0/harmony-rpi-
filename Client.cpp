@@ -26,6 +26,12 @@ Client::~Client() {
     disconnect();
 }
 
+Client &Client::get_instance(const std::string& IP, const std::string& client_id) {
+    static Client instance(IP, client_id);
+    return instance;
+}
+
+
 CONNECTION_STATUS Client::connect() {
 
     try {

@@ -10,7 +10,6 @@
 
 #include <unordered_map>
 
-
 const std::string SERVER_ADDRESS{ "tcp://localhost:1883"};
 const std::string CLIENT_ID{ "rpi_01"};
 enum class CONNECTION_STATUS {SUCCESS, FAILURE};
@@ -22,12 +21,14 @@ enum class CONNECTION_STATUS {SUCCESS, FAILURE};
  */
 class Client {
 public:
+
     /**
-     * @brief Constructor for the MQTT client, sets some default values.
-     * @param server_address The address of the MQTT server.
-     * @param client_id The unique identifier for this client.
+     * @brief Gets the singleton instance of the MQTT client.
+     * @return The singleton instance of the MQTT client.
      */
-    Client(const std::string& server_address, const std::string& client_id);
+    static Client& get_instance(const std::string& server_address, const std::string& client_id);
+
+
 
     /**
      * @brief Destructor for the MQTT client. Disconnects the client.
@@ -166,6 +167,14 @@ public:
     const std::unique_ptr<mqtt::topic> &getSubscribeTopic() const;
 
 private:
+
+    /**
+     * @brief Constructor for the MQTT client, sets some default values.
+     * @param server_address The address of the MQTT server.
+     * @param client_id The unique identifier for this client.
+     */
+    Client(const std::string& server_address, const std::string& client_id);
+
     mycallback cb; ///< Callback handler for MQTT events.
     mqtt::async_client cli; ///< The underlying Paho MQTT client.
     int QOS; ///< Quality of Service level.
