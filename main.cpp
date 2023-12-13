@@ -28,11 +28,13 @@ int main() {
         std::cout << "starting failed" << std::endl;
     }
 
-    int x = 1000;
 
-    while (x > 0) {
+    while (true) {
 
         //control logic here
+
+
+
 
 
 
@@ -50,8 +52,6 @@ int main() {
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-          x--;
     }
 
-    return 0;
 }
