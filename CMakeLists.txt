@@ -10,3 +10,4 @@ add_executable(harmony_rpi main.cpp
         mycallback.cpp
         mycallback.h)
 target_link_libraries(  harmony_rpi  PahoMqttCpp::paho-mqttpp3)
+install(TARGETS test-harmo DESTINATION ${CMAKE_INSTALL_BINDIR})

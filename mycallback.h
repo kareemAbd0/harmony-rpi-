@@ -7,6 +7,7 @@
 #include <mqtt/async_client.h>
 
 
+
 class mycallback : public virtual mqtt::callback
 {
 public:
