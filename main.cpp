@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
 
 
     std::string SERVER_ADDRESS,CLIENT_ID ;
+
     //get server address and client id from command line arguments, tie is used to return the two variables at once
     std::tie(SERVER_ADDRESS, CLIENT_ID) = Client::get_server_and_clientID(argc, argv);
 
@@ -29,6 +30,11 @@ int main(int argc, char* argv[]) {
         std::cout << "starting failed" << std::endl;
     }
 
+
+    //for testing purposes, to be removed later.
+    int time_ms_debug = 1;
+    std::cout << "enter time in ms to sleep for in loop" << std::endl;
+    std::cin >> time_ms_debug;
 
     while (true) {
 
@@ -52,7 +58,9 @@ int main(int argc, char* argv[]) {
             std::cout << "publishing failed" << std::endl;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_ms_debug));
     }
 
 }

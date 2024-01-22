@@ -48,7 +48,7 @@ CONNECTION_STATUS Client::connect() {
 CONNECTION_STATUS Client::proxy_subscribe() {
     try {
         proxy_subscribe_topic->subscribe()->wait();
-        std::cout << "Subscribed proxy" << std::endl;
+        std::cout << "proxy subscribed" << std::endl;
         return CONNECTION_STATUS::SUCCESS;
     }
     catch (const mqtt::exception &exc) {
@@ -130,7 +130,7 @@ CONNECTION_STATUS Client::v2v_subscribe(const std::string& topic_name) {
 
     try {
         v2v_subscribed_topics[topic_name]->subscribe()->wait();
-        std::cout << "Subscribed" << std::endl;
+        std::cout << "v2v "  << topic_name <<  " Subscribed" << std::endl;
         return CONNECTION_STATUS::SUCCESS;
     }
     catch (const mqtt::exception &exc) {
