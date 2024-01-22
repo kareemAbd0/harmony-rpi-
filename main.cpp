@@ -6,10 +6,12 @@
 #include "Client.h"
 
 
+int main(int argc, char* argv[]) {
 
-int main() {
 
-
+    std::string SERVER_ADDRESS,CLIENT_ID ;
+    //get server address and client id from command line arguments, tie is used to return the two variables at once
+    std::tie(SERVER_ADDRESS, CLIENT_ID) = Client::get_server_and_clientID(argc, argv);
 
     Client &my_client = Client::get_instance(SERVER_ADDRESS, CLIENT_ID);
 
@@ -50,7 +52,7 @@ int main() {
             std::cout << "publishing failed" << std::endl;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
 }

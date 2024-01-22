@@ -10,8 +10,6 @@
 
 #include <unordered_map>
 
-const std::string SERVER_ADDRESS{ "tcp://localhost:1883"};
-const std::string CLIENT_ID{ "rpi_01"};
 enum class CONNECTION_STATUS {SUCCESS, FAILURE};
 
 
@@ -147,6 +145,19 @@ public:
      * @param QOS The Quality of Service level.
      */
     void set_qos(int QOS);
+
+
+
+
+
+    /**
+     * @brief Gets the server address and client id from the command line arguments, is is static because it is used before the client is created.
+     * @param argc The number of command line arguments.
+     * @param argv The command line arguments.
+     * @return The server address and client id.
+     */
+    static std::pair<std::string, std::string> get_server_and_clientID(int argc, char* argv[]);
+
 
     /**
      * @brief Gets the current Quality of Service (QoS) level.

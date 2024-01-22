@@ -198,6 +198,34 @@ void Client::set_qos(int QOS) {
 }
 
 
+std::pair<std::string, std::string> Client::get_server_and_clientID(int argc, char* argv[]){
+    std::string SERVER_ADDRESS;
+    std::string CLIENT_ID;
+
+    if (argc == 2){
+        SERVER_ADDRESS = argv[1];
+        CLIENT_ID = "rpi_01";
+        std::cout << "server address is " << SERVER_ADDRESS << std::endl;
+        std::cout << "client id is " << CLIENT_ID << std::endl;
+
+    } else if (argc == 3){
+        SERVER_ADDRESS = argv[1];
+        CLIENT_ID = argv[2];
+        std::cout << "server address is " << SERVER_ADDRESS << std::endl;
+        std::cout << "client id is " << CLIENT_ID << std::endl;
+    } else if (argc > 3){
+        std::cout << "too many arguments provided" << std::endl;
+        std::cout << "usage: .harmony_rpi <server address> <client id>" << std::endl;
+
+        exit(1);
+    } else {
+        SERVER_ADDRESS = "tcp://localhost:1883";
+        CLIENT_ID = "rpi_01";
+    }
+
+    return {SERVER_ADDRESS, CLIENT_ID};
+}
+
 int Client::get_qos() const {
     return QOS;
 }
