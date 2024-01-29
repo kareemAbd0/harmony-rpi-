@@ -1,8 +1,9 @@
 //
 // Created by kareem on 12/4/23.
 //
-
+#include <map>
 #include "mycallback.h"
+
 
 
 
@@ -16,7 +17,7 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     std::cout << "Message arrived" << std::endl;
     std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
    std::cout << "\tpayload: '" << msg->to_string() << "'\n" << std::endl;
-   //payload = msg->to_string();
+    messages[msg->get_topic()] = msg->to_string();
 }
 void mycallback::delivery_complete(mqtt::delivery_token_ptr token) {
     std::cout << "Delivery complete for token: "

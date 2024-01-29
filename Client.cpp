@@ -81,13 +81,11 @@ CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
 
 
 //needs removal,should be async with call back only
-std::string Client::get_message() const {
-   std::string payload = cb.payload;
+std::string Client::get_message( std::string &topic) const {
+
+    std::string payload = cb.messages.at(topic);
     return payload;
 }
-
-
-
 
 
 

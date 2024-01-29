@@ -12,7 +12,7 @@ class mycallback : public virtual mqtt::callback
 {
 public:
 
-    std::string payload;
+    std::map <std::string,std::string> messages;
 
 private:
 

@@ -114,7 +114,7 @@ public:
      * @brief Retrieves the last received message.
      * @return The last received message.
      */
-    std::string get_message() const;
+    std::string get_message(std::string &topic) const;
 
     /**
      * @brief Sets the MQTT connection options.

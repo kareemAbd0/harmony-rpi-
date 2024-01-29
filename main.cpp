@@ -9,6 +9,11 @@
 int main(int argc, char* argv[]) {
 
 
+
+    int time_ms_debug = 1;
+    std::cout << "enter time in ms to sleep for in loop" << std::endl;
+    std::cin >> time_ms_debug;
+
     std::string SERVER_ADDRESS,CLIENT_ID ;
 
     //get server address and client id from command line arguments, tie is used to return the two variables at once
@@ -32,20 +37,24 @@ int main(int argc, char* argv[]) {
 
 
     //for testing purposes, to be removed later.
-    int time_ms_debug = 1;
-    std::cout << "enter time in ms to sleep for in loop" << std::endl;
-    std::cin >> time_ms_debug;
+
 
     while (true) {
 
-        //control logic here
+        //control logic here (below is an example)
 
+        std::string control_topic1("rpi/01/sensors");
+        std::string local_control_message = my_client.get_message(control_topic1);
+        //convert the string to a float
+        float local_control_value = std::stof(local_control_message);
+        local_control_value ++;
+        local_control_value*=22;
+        
+        //control example ends here
 
+        local_control_message = std::to_string(local_control_value);
 
-
-
-
-        if (my_client.proxy_publish("some actions") == CONNECTION_STATUS::SUCCESS) {
+        if (my_client.proxy_publish(local_control_message) == CONNECTION_STATUS::SUCCESS) {
             std::cout << "published successfully" << std::endl;
         } else {
             std::cout << "publishing failed" << std::endl;
