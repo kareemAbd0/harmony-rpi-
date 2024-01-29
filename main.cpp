@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
 
 
 
+    //for testing purposes, to be removed later.
     int time_ms_debug = 1;
     std::cout << "enter time in ms to sleep for in loop" << std::endl;
     std::cin >> time_ms_debug;
@@ -36,7 +37,6 @@ int main(int argc, char* argv[]) {
     }
 
 
-    //for testing purposes, to be removed later.
 
 
     while (true) {
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         float local_control_value = std::stof(local_control_message);
         local_control_value ++;
         local_control_value*=22;
-        
+
         //control example ends here
 
         local_control_message = std::to_string(local_control_value);

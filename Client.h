@@ -111,9 +111,11 @@ public:
 
 
     /**
-     * @brief Retrieves the last received message.
-     * @return The last received message.
+     * @brief Gets the latest message from a specific topic.
+     * @param topic The topic to get the message from.
+     * @return The message from the topic.
      */
+
     std::string get_message(std::string &topic) const;
 
     /**
