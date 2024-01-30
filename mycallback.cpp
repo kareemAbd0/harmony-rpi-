@@ -43,10 +43,10 @@ void mycallback::delivery_complete(mqtt::delivery_token_ptr token) {
     std::cout << "Delivery complete.\nToken: " << token->get_message_id() << std::endl;
 }
 
-std::string mycallback::get_message(const std::string &topic) {
+std::string mycallback::get_message(const std::string &topic){
     // check if the topic is in the map
     // searching in all topics, which are V2V and Proxy topics
-    if(messsages.find(topic) == messsages.end()){
+    if(messages.find(topic) == messages.end()){
         std::cout << "topic not found" << std::endl;
         exit(1);
     }
@@ -56,7 +56,7 @@ std::string mycallback::get_message(const std::string &topic) {
     std::string payload = messages[topic];
     // unlock
     mtx.unlock();
-    return payload
+    return payload;
 }
 
 

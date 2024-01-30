@@ -83,7 +83,7 @@ CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
 
 
 //needs removal,should be async with call back only
-std::string Client::get_message( std::string &topic) const {
+std::string Client::get_message( std::string &topic)  {
     return cb.get_message(topic);
 }
 
@@ -147,7 +147,7 @@ void Client::add_v2v_subscribed_topic(const std::string& topic_name) {
        std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
 
        //move is used here because the unique_ptr can't be copied, we only transfer the ownership
-       v2v_subscribed_hopics.insert(std::make_pair(topic_name, std::move(new_topic)));
+       v2v_subscribed_topics.insert(std::make_pair(topic_name, std::move(new_topic)));
 
 }
 

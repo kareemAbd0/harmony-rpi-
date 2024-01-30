@@ -8,6 +8,9 @@ add_executable(harmony_rpi main.cpp
         Client.cpp
         Client.h
         mycallback.cpp
-        mycallback.h)
+        mycallback.h
+	control.cpp
+	control.h
+	)
 target_link_libraries(  harmony_rpi  PahoMqttCpp::paho-mqttpp3)
 install(TARGETS harmony_rpi DESTINATION ${CMAKE_INSTALL_BINDIR})

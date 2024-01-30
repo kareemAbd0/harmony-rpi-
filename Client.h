@@ -115,7 +115,7 @@ public:
      * @param topic The topic to get the message from.
      * @return The message from the topic.
      */
-    std::string get_message(std::string &topic) const;
+    std::string get_message(std::string &topic) ;
 
     /**
      * @brief Sets the MQTT connection options.

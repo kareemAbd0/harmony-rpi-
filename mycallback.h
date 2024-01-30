@@ -24,6 +24,7 @@ public:
         messages[MAIN_TOPIC] = EMPTY_JSON_MESSAGE;
     }
 
+     std::string get_message(const std::string &topic);
 private:
 
     void connected(const std::string& cause) override ;
