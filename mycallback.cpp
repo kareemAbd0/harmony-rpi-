@@ -2,8 +2,11 @@
 // Created by kareem on 12/4/23.
 //
 #include <map>
+#include <mutex>
 #include "mycallback.h"
 
+
+static std::mutex mtx;
 
 
 
@@ -12,20 +15,49 @@ void mycallback::connected(const std::string &cause) {
 }
 void mycallback::connection_lost(const std::string &cause) {
         std::cout << "Connection lost: " << cause << std::endl;
+        exit(1);
 }
 void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     std::cout << "Message arrived" << std::endl;
     std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
-   std::cout << "\tpayload: '" << msg->to_string() << "'\n" << std::endl;
-    if (!msg->to_string().empty()) {
-        messages[msg->get_topic()] = msg->to_string();
+    std::cout << "\tpayload: '" << msg->to_string() << "'\n" << std::endl;
+    // This is a safety measure to avoid empty messages due to failure in other subsystems.
+    // In normal operation, this should never happen.
+    if (msg->to_string().empty()) {
+        std::cout << "Empty message received!" << std::endl;
+        exit(1);
     }
+    // lock
+    mtx.lock();
+    messages[msg->get_topic()] = msg->to_string();
+    received_flag = 1;
+    // unlock
+    mtx.unlock();
+    received_messages++;
 }
 void mycallback::delivery_complete(mqtt::delivery_token_ptr token) {
-    std::cout << "Delivery complete for token: "
-              << (token ? token->get_message_id() : -1) << std::endl;
+    if(token){
+        std::cout << "Delivery failed!" << std::endl;
+        exit(1);
+    }
+    std::cout << "Delivery complete.\nToken: " << token->get_message_id() << std::endl;
 }
 
+std::string mycallback::get_message(const std::string &topic) {
+    // check if the topic is in the map
+    // searching in all topics, which are V2V and Proxy topics
+    if(messsages.find(topic) == messsages.end()){
+        std::cout << "topic not found" << std::endl;
+        exit(1);
+    }
+    // lock
+    mtx.lock();
+    received_flag = 0;
+    std::string payload = messages[topic];
+    // unlock
+    mtx.unlock();
+    return payload
+}
 
 
 

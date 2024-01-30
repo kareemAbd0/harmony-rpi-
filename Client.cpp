@@ -12,13 +12,11 @@
 
 
 Client::Client(const std::string& server_address, const std::string& client_id) :
-cli(server_address, client_id),
-QOS(1),
-proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
-connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()),
-proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true)){
-
-
+    cli(server_address, client_id),
+    QOS(1),
+    proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
+    connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()),
+    proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true)){
 
     cli.set_callback(cb);
 }
@@ -36,7 +34,7 @@ Client &Client::get_instance(const std::string& IP, const std::string& client_id
 CONNECTION_STATUS Client::connect() {
 
     try {
-
+        // why wait? wait for the mqtt server to fully connect
         cli.connect(connOpts)->wait();
         return CONNECTION_STATUS::SUCCESS;
     }
@@ -48,7 +46,10 @@ CONNECTION_STATUS Client::connect() {
 
 CONNECTION_STATUS Client::proxy_subscribe() {
     try {
+        // why wait? wait for the mqtt server to fully subscribe to the topic
+        // then return to this function after the full subscription is done
         proxy_subscribe_topic->subscribe()->wait();
+        // TODO: print the actual topic name.
         std::cout << "proxy subscribed" << std::endl;
         return CONNECTION_STATUS::SUCCESS;
     }
@@ -60,7 +61,7 @@ CONNECTION_STATUS Client::proxy_subscribe() {
 
 CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
     try {
-        proxy_publish_topic->publish(payload);
+        proxy_publish_topic->publish(payload)->wait();
         return CONNECTION_STATUS::SUCCESS;
     }
     catch (const mqtt::exception &exc) {
@@ -83,31 +84,31 @@ CONNECTION_STATUS Client::proxy_publish(const std::string& payload) {
 
 //needs removal,should be async with call back only
 std::string Client::get_message( std::string &topic) const {
-
-    std::string payload = cb.messages.at(topic);
-    return payload;
+    return cb.get_message(topic);
 }
 
 
 
 CONNECTION_STATUS Client::start_client() {
+    // Start the client, connects to the mosquitto broker
     if (connect() == CONNECTION_STATUS::FAILURE) {
         std::cout << "connection failed" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
+    // 
     if (proxy_subscribe() == CONNECTION_STATUS::FAILURE) {
         std::cout << "subscription failed of proxy" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
-    for (auto&& v2v_topic_pair: v2v_subscribed_topics) {
+    // the actual type?
+    for (auto&& v2v_topic_pair : v2v_subscribed_topics) {
+        // Connects to all other RPIs
         if (v2v_subscribe(v2v_topic_pair.first) == CONNECTION_STATUS::FAILURE) {
             std::cout << "subscription failed of " << v2v_topic_pair.first <<  std::endl;
             return CONNECTION_STATUS::FAILURE;
         }
 
     }
-
-
 
     return CONNECTION_STATUS::SUCCESS;
 }
@@ -146,7 +147,7 @@ void Client::add_v2v_subscribed_topic(const std::string& topic_name) {
        std::unique_ptr<mqtt::topic> new_topic =  std::make_unique<mqtt::topic>(cli, topic_name, QOS, true);
 
        //move is used here because the unique_ptr can't be copied, we only transfer the ownership
-       v2v_subscribed_topics.insert(std::make_pair(topic_name, std::move(new_topic)));
+       v2v_subscribed_hopics.insert(std::make_pair(topic_name, std::move(new_topic)));
 
 }
 
@@ -201,27 +202,26 @@ std::pair<std::string, std::string> Client::get_server_and_clientID(int argc, ch
     std::string SERVER_ADDRESS;
     std::string CLIENT_ID;
 
-    if (argc == 2){
-        SERVER_ADDRESS = argv[1];
-        CLIENT_ID = "rpi_01";
-        std::cout << "server address is " << SERVER_ADDRESS << std::endl;
-        std::cout << "client id is " << CLIENT_ID << std::endl;
-
-    } else if (argc == 3){
-        SERVER_ADDRESS = argv[1];
-        CLIENT_ID = argv[2];
-        std::cout << "server address is " << SERVER_ADDRESS << std::endl;
-        std::cout << "client id is " << CLIENT_ID << std::endl;
-    } else if (argc > 3){
-        std::cout << "too many arguments provided" << std::endl;
-        std::cout << "usage: .harmony_rpi <server address> <client id>" << std::endl;
-
-        exit(1);
-    } else {
-        SERVER_ADDRESS = "tcp://localhost:1883";
-        CLIENT_ID = "rpi_01";
+    switch (argc) {
+        case 1:
+            SERVER_ADDRESS = "tcp://localhost:1883";
+            CLIENT_ID = "rpi_01";
+            break;
+        case 2:
+            SERVER_ADDRESS = argv[1];
+            CLIENT_ID = "rpi_01";
+            break;
+        case 3:
+            SERVER_ADDRESS = argv[1];
+            CLIENT_ID = argv[2];
+            break;
+        default:
+            std::cout << "too many arguments provided" << std::endl;
+            std::cout << "usage: harmony_rpi <server address> <client id>" << std::endl;
+            exit(1);
     }
-
+    std::cout << "server address is " << SERVER_ADDRESS << std::endl;
+    std::cout << "client id is " << CLIENT_ID << std::endl;
     return {SERVER_ADDRESS, CLIENT_ID};
 }
 
@@ -237,12 +237,6 @@ const std::unique_ptr<mqtt::topic> &Client::getSubscribeTopic() const {
     return proxy_subscribe_topic;
 }
 
-
-
-
-
-
-
-
-
-
+int Client::new_message_received() const {
+    return cb.received_flag;
+}

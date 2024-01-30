@@ -115,7 +115,6 @@ public:
      * @param topic The topic to get the message from.
      * @return The message from the topic.
      */
-
     std::string get_message(std::string &topic) const;
 
     /**
@@ -179,6 +178,12 @@ public:
      */
     const std::unique_ptr<mqtt::topic> &getSubscribeTopic() const;
 
+    /**
+     * @brief returns whether a new message has been received or not.
+     * @return 1 if a new message has been received, 0 otherwise.
+     */
+    int new_message_received() const;
+
 private:
 
     /**
@@ -192,10 +197,26 @@ private:
     mqtt::async_client cli; ///< The underlying Paho MQTT client.
     int QOS; ///< Quality of Service level.
 
-    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> v2v_subscribed_topics; ///MQTT subscribed V2V topics.
-    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> v2v_published_topics; ///MQTT published V2V topics.
-    std::unique_ptr<mqtt::topic> proxy_publish_topic; ///< MQTT topic for publishing.
-    std::unique_ptr<mqtt::topic> proxy_subscribe_topic; ///< MQTT topic for subscribing.
+    // V2V topics equals to the number of vehicles(including platoon leader) in
+    // the simulation
+    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> 
+    v2v_subscribed_topics; ///MQTT subscribed V2V topics.
+
+    // V2v topics equals to the number of vehicles(including platoon leader) in
+    // the simulation
+    std::unordered_map<std::string,std::unique_ptr<mqtt::topic>> 
+    v2v_published_topics; ///MQTT published V2V topics.
+
+    // Proxy topic is only one for each vehicle as this is the actions sent to
+    // the simulator through the proxy
+    std::unique_ptr<mqtt::topic> 
+    proxy_publish_topic; ///< MQTT topic for publishing.
+
+    // Proxy topic is only one for each vehicle as this is the sensor data
+    // coming from the simulator through the proxy
+    std::unique_ptr<mqtt::topic> 
+    proxy_subscribe_topic; ///< MQTT topic for subscribing.
+
     mqtt::connect_options connOpts; ///< MQTT connection options.
 };
 

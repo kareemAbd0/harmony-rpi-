@@ -6,13 +6,23 @@
 #define HARMONY_RPI_MYCALLBACK_H
 #include <mqtt/async_client.h>
 
-
+#define EMPTY_JSON_MESSAGE   "{}"
+#define MAIN_TOPIC      "rpi/01/sensors"
+// TODO: a list with all topics
 
 class mycallback : public virtual mqtt::callback
 {
 public:
 
+    int received_messages = 0;
+    int delivered_messages = 0;
+    int received_flag = 0;
     std::map <std::string,std::string> messages;
+
+    mycallback(){
+        // TODO: initialize all topics with empty messages
+        messages[MAIN_TOPIC] = EMPTY_JSON_MESSAGE;
+    }
 
 private:
 
