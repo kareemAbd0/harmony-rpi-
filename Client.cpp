@@ -14,9 +14,9 @@
 Client::Client(const std::string& server_address, const std::string& client_id) :
     cli(server_address, client_id),
     QOS(1),
-    proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, true)),
+    proxy_publish_topic(std::make_unique<mqtt::topic>( cli, "rpi/01/actions", QOS, false)),
     connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()),
-    proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, true)){
+    proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, "rpi/01/sensors", QOS, false)){
 
     cli.set_callback(cb);
 }

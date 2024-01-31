@@ -25,7 +25,8 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     // In normal operation, this should never happen.
     if (msg->to_string().empty()) {
         std::cout << "Empty message received!" << std::endl;
-        exit(1);
+        messages[msg->get_topic()] = "'{\"xl\": \"-23.22166392048075\", \"yl\": \"40.485157426243994\", \"xf\": \"-19.073077371416503\", \"yf\": \"65.43151651773508\", \"vl\": \"0.0009547182841672307\", \"vf\": \"0.001628209484989103\"}'";
+        std::cout << "new payload: " << messages[msg->get_topic()] << std::endl;
     }
     // lock
     mtx.lock();
@@ -36,7 +37,7 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     received_messages++;
 }
 void mycallback::delivery_complete(mqtt::delivery_token_ptr token) {
-    if(token){
+    if(!token){
         std::cout << "Delivery failed!" << std::endl;
         exit(1);
     }

@@ -21,8 +21,8 @@ int main(int argc, char* argv[]) {
     // TODO: get the value from the command line arguments
     //for testing purposes, to be removed later.
     int time_ms_debug = 1;
-    std::cout << "enter time in ms to sleep for in loop" << std::endl;
-    std::cin >> time_ms_debug;
+    //std::cout << "enter time in ms to sleep for in loop" << std::endl;
+    //std::cin >> time_ms_debug;
 
     // Normal strings, but all caps. Why? no reason.
     std::string SERVER_ADDRESS,CLIENT_ID ;
@@ -63,6 +63,8 @@ int main(int argc, char* argv[]) {
 
             std::string control_topic1("rpi/01/sensors");
             std::string local_control_message = my_client.get_message(control_topic1);
+
+            std::cout << "received message: " << local_control_message << std::endl;
 
             //control logic here (below is an example)
             std::stringstream buffer(local_control_message);
