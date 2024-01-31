@@ -21,6 +21,7 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     std::cout << "Message arrived" << std::endl;
     std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
     std::cout << "\tpayload: '" << msg->to_string() << "'\n" << std::endl;
+    std::cout << "Message size: " << msg->to_string().size() << std::endl;
     // This is a safety measure to avoid empty messages due to failure in other subsystems.
     // In normal operation, this should never happen.
     if (msg->to_string().empty()) {
