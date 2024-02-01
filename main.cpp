@@ -33,13 +33,6 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Entering While loop\n";
 
-    double vl = 0.0 ;
-    double vf = 0.0 ;
-    double xl = 0.0 ;
-    double yl = 0.0 ;
-    double xf = 0.0 ;
-    double yf = 0.0 ;
-
 
     while (true) {
 
