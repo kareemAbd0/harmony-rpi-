@@ -1,13 +1,8 @@
-//
-// Created by kareem on 12/4/23.
-//
+#include <cstdlib>
 #include <map>
 #include <mutex>
+#include <condition_variable>
 #include "mycallback.h"
-
-
-static std::mutex mtx;
-
 
 
 void mycallback::connected(const std::string &cause) {
@@ -26,40 +21,46 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     // In normal operation, this should never happen.
     if (msg->to_string().empty()) {
         std::cout << "Empty message received!" << std::endl;
-        messages[msg->get_topic()] = "'{\"xl\": \"-23.22166392048075\", \"yl\": \"40.485157426243994\", \"xf\": \"-19.073077371416503\", \"yf\": \"65.43151651773508\", \"vl\": \"0.0009547182841672307\", \"vf\": \"0.001628209484989103\"}'";
-        std::cout << "new payload: " << messages[msg->get_topic()] << std::endl;
+        exit(1);
     }
     // lock
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
     messages[msg->get_topic()] = msg->to_string();
-    received_flag = 1;
-    // unlock
-    mtx.unlock();
+    received_flag = true;
+    cv.notify_one();
     received_messages++;
 }
 void mycallback::delivery_complete(mqtt::delivery_token_ptr token) {
     if(!token){
-        std::cout << "Delivery failed!" << std::endl;
+        std::cout << "Delivery failed! Invalid token receieved" << std::endl;
         exit(1);
     }
-    std::cout << "Delivery complete.\nToken: " << token->get_message_id() << std::endl;
+    std::cout << "Delivery complete. Token: " << token->get_message_id() << std::endl;
 }
 
 std::string mycallback::get_message(const std::string &topic){
     // check if the topic is in the map
     // searching in all topics, which are V2V and Proxy topics
     if(messages.find(topic) == messages.end()){
-        std::cout << "topic not found" << std::endl;
+        std::cout << "topic ( "<< topic << " ) was not found.\n Exiting..." << std::endl;
         exit(1);
     }
     // lock
-    mtx.lock();
-    received_flag = 0;
+    std::lock_guard<std::mutex> lock(mtx);
+    received_flag = false;
     std::string payload = messages[topic];
-    // unlock
-    mtx.unlock();
     return payload;
 }
 
-
-
+void mycallback::wait_new_message(){
+    // lock
+    std::unique_lock<std::mutex> lk(mtx);
+    // stops waiting when received_flag is true
+    // checks for spurious wakeups
+    // automatically unlocks the mutex when the thread is blocked
+    // automatically reacquires the mutex before the call to wait returns
+    // https://en.cppreference.com/w/cpp/thread/condition_variable/wait
+    cv.wait(lk, [this]{return received_flag;});
+    // unlock
+    lk.unlock();
+}
