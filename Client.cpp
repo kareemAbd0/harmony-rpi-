@@ -33,7 +33,6 @@ Client &Client::get_instance(const std::string& IP, const std::string& client_id
 CONNECTION_STATUS Client::connect() {
 
     try {
-        // why wait? wait for the mqtt server to fully connect
         cli.connect(connOpts)->wait();
         return CONNECTION_STATUS::SUCCESS;
     }
@@ -99,7 +98,6 @@ CONNECTION_STATUS Client::start_client() {
         std::cout << "subscription failed of proxy" << std::endl;
         return CONNECTION_STATUS::FAILURE;
     }
-    // the actual type?
     for (auto&& v2v_topic_pair : v2v_subscribed_topics) {
         // Connects to all other RPIs
         if (v2v_subscribe(v2v_topic_pair.first) == CONNECTION_STATUS::FAILURE) {

@@ -22,12 +22,9 @@ void mycallback::message_arrived(mqtt::const_message_ptr msg) {
     std::cout << "\ttopic: '" << msg->get_topic() << "'" << std::endl;
     std::cout << "\tpayload: '" << msg->to_string() << "'\n" << std::endl;
     std::cout << "Message size: " << msg->to_string().size() << std::endl;
-    // This is a safety measure to avoid empty messages due to failure in other subsystems.
-    // In normal operation, this should never happen.
     if (msg->to_string().empty()) {
         std::cout << "Empty message received!" << std::endl;
-        messages[msg->get_topic()] = "'{\"xl\": \"-23.22166392048075\", \"yl\": \"40.485157426243994\", \"xf\": \"-19.073077371416503\", \"yf\": \"65.43151651773508\", \"vl\": \"0.0009547182841672307\", \"vf\": \"0.001628209484989103\"}'";
-        std::cout << "new payload: " << messages[msg->get_topic()] << std::endl;
+        exit(1);
     }
     // lock
     mtx.lock();
