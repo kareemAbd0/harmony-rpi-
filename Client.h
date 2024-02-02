@@ -2,6 +2,9 @@
 #define HARMONY_RPI_CLIENT_H
 
 #include <unordered_map>
+#include <string>
+#include "mqtt/async_client.h"
+#include "mycallback.h"
 
 enum class CONNECTION_STATUS {SUCCESS, FAILURE};
 
