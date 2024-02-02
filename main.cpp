@@ -36,16 +36,16 @@ int main(int argc, char* argv[]) {
     double xf = 0.0 ;
     double yf = 0.0 ;
 
-    std::string control_topic1("rpi/01/sensors");
-    std::ostringstream oss;
+    std::string sensors_topic("rpi/01/sensors");
     std::string local_control_message;
-    boost::property_tree::ptree sensors;
-    boost::property_tree::ptree acions;
 
     while (true) {
+        std::ostringstream oss;
+        boost::property_tree::ptree sensors;
+        boost::property_tree::ptree acions;
         my_client.wait_new_message();
 
-        local_control_message = my_client.get_message(control_topic1);
+        local_control_message = my_client.get_message(sensors_topic);
 
         //control logic here (below is an example)
         std::stringstream buffer(local_control_message);
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
         xf = sensors.get<double>("xf");
         yf = sensors.get<double>("yf");
 
-        acions.put("af", Control::getControl(vl, vf, xl, yl, xf, yf));
+        acions.put("af", Control::getControl( xl, yl, xf, yf,vl, vf));
 
         boost::property_tree::write_json(oss, acions);
 
