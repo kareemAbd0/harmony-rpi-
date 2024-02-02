@@ -4,8 +4,6 @@ project(rpi)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(PahoMqttCpp REQUIRED)
-find_package(eclipse-paho-mqtt-c REQUIRED)
-find_package(OpenSSL REQUIRED)
 add_executable(rpi main.cpp
         Client.cpp
         Client.h
