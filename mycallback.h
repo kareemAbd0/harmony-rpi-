@@ -1,13 +1,12 @@
 #ifndef HARMONY_RPI_MYCALLBACK_H
 #define HARMONY_RPI_MYCALLBACK_H
-#include "config.h"
-#include <mqtt/async_client.h>
 #include <cstdlib>
 #include <map>
+#include <mqtt/async_client.h>
 #include <mutex>
 #include <condition_variable>
+#include "config.h"
 
-const std::string empty_string = "{}";
 
 // TODO: a list with all topics
 
@@ -24,7 +23,7 @@ public:
 
     mycallback(){
         // TODO: initialize all topics with empty messages
-        messages[sensor_topic] = empty_string;
+        messages[sensors_topic] = empty_message;
     }
 
     std::string get_message(const std::string &topic);

@@ -1,6 +1,6 @@
-#include "mycallback.h"
 #include <mqtt/async_client.h>
 #include <memory>
+#include "mycallback.h"
 #include "Client.h"
 
 Client::Client(const std::string& server_address, const std::string& client_id) :
@@ -8,7 +8,7 @@ Client::Client(const std::string& server_address, const std::string& client_id) 
     QOS(1),
     proxy_publish_topic(std::make_unique<mqtt::topic>( cli, actions_topic, QOS, false)),
     connOpts(mqtt::connect_options_builder().clean_session().will(mqtt::message("last", "bye!", 5, 1, true)) .keep_alive_interval(std::chrono::seconds(60)).finalize()),
-    proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, sensor_topic, QOS, false)){
+    proxy_subscribe_topic (std::make_unique<mqtt::topic>(cli, sensors_topic, QOS, false)){
 
     cli.set_callback(cb);
 }

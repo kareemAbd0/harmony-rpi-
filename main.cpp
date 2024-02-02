@@ -2,6 +2,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include "config.h"
 #include "mycallback.h"
 #include "Client.h"
 #include "control.h"
@@ -14,18 +15,12 @@ int main(int argc, char* argv[]) {
 
     Client &my_client = Client::get_instance(SERVER_ADDRESS, CLIENT_ID);
 
-    my_client.add_v2v_subscribed_topic("rpi/00/position");
-    my_client.add_v2v_subscribed_topic("rpi/03/position");
-    my_client.remove_v2v_subscribed_topic("rpi/00/position");
-    my_client.add_v2v_published_topic("rpi/01/position");
-
-
     if (my_client.start_client() != CONNECTION_STATUS::SUCCESS){
         std::cout << "starting client failed\nExiting";
         exit(1);
     }
 
-    std::cout << "Client started successfully.\nEntering While loop\n";
+    std::cout << "Client started successfully."<< std::endl;
 
     //for testing purposes, to be removed later.
     double vl = 0.0 ;
@@ -35,16 +30,17 @@ int main(int argc, char* argv[]) {
     double xf = 0.0 ;
     double yf = 0.0 ;
 
-    std::string sensors_topic("rpi/01/sensors");
+    std::string sensors_topic1 = sensors_topic;
     std::string local_control_message;
 
     while (true) {
         std::ostringstream oss;
         boost::property_tree::ptree sensors;
-        boost::property_tree::ptree acions;
+        boost::property_tree::ptree actions;
+        std::cout << "Waiting for new message" << std::endl;
         my_client.wait_new_message();
 
-        local_control_message = my_client.get_message(sensors_topic);
+        local_control_message = my_client.get_message(sensors_topic1);
 
         //control logic here (below is an example)
         std::stringstream buffer(local_control_message);
@@ -58,9 +54,9 @@ int main(int argc, char* argv[]) {
         xf = sensors.get<double>("xf");
         yf = sensors.get<double>("yf");
 
-        acions.put("af", Control::getControl( xl, yl, xf, yf,vl, vf));
+        actions.put("af", Control::getControl( xl, yl, xf, yf,vl, vf));
 
-        boost::property_tree::write_json(oss, acions);
+        boost::property_tree::write_json(oss, actions);
 
         std::cout <<"Publishing: "<< oss.str() << std::endl;
 
