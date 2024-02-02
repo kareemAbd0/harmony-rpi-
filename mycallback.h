@@ -5,10 +5,9 @@
 #include <map>
 #include <mutex>
 #include <condition_variable>
-#include <thread>
 
 #define EMPTY_JSON_MESSAGE   "{}"
-#define MAIN_TOPIC           "rpi/01/sensors"
+#define MAIN_TOPIC      "rpi/01/sensors"
 // TODO: a list with all topics
 
 class mycallback : public virtual mqtt::callback
@@ -24,7 +23,7 @@ public:
 
     mycallback(){
         // TODO: initialize all topics with empty messages
-        messages[MAIN_TOPIC]  = EMPTY_JSON_MESSAGE;
+        messages[MAIN_TOPIC] = EMPTY_JSON_MESSAGE;
     }
 
     std::string get_message(const std::string &topic);

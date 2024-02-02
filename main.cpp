@@ -16,10 +16,10 @@ int main(int argc, char* argv[]) {
 
     Client &my_client = Client::get_instance(SERVER_ADDRESS, CLIENT_ID);
 
-    // my_client.add_v2v_subscribed_topic("rpi/00/position");
-    // my_client.add_v2v_subscribed_topic("rpi/03/position");
-    // my_client.remove_v2v_subscribed_topic("rpi/00/position");
-    // my_client.add_v2v_published_topic("rpi/01/position");
+    my_client.add_v2v_subscribed_topic("rpi/00/position");
+    my_client.add_v2v_subscribed_topic("rpi/03/position");
+    my_client.remove_v2v_subscribed_topic("rpi/00/position");
+    my_client.add_v2v_published_topic("rpi/01/position");
 
     if (my_client.start_client() != CONNECTION_STATUS::SUCCESS){
         std::cout << "starting client failed\nExiting";
