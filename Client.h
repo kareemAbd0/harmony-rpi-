@@ -1,18 +1,12 @@
-//
-// Created by kareem on 12/4/23.
-//
-
 #ifndef HARMONY_RPI_CLIENT_H
 #define HARMONY_RPI_CLIENT_H
 
-
-
-
 #include <unordered_map>
+#include <string>
+#include "mqtt/async_client.h"
+#include "mycallback.h"
 
 enum class CONNECTION_STATUS {SUCCESS, FAILURE};
-
-
 
 /**
  * @brief Represents an MQTT client with simplified configuration, functionality and default values for the rpi project.
@@ -25,8 +19,6 @@ public:
      * @return The singleton instance of the MQTT client.
      */
     static Client& get_instance(const std::string& server_address, const std::string& client_id);
-
-
 
     /**
      * @brief Destructor for the MQTT client. Disconnects the client.
@@ -146,10 +138,6 @@ public:
      */
     void set_qos(int QOS);
 
-
-
-
-
     /**
      * @brief Gets the server address and client id from the command line arguments, is is static because it is used before the client is created.
      * @param argc The number of command line arguments.
@@ -157,7 +145,6 @@ public:
      * @return The server address and client id.
      */
     static std::pair<std::string, std::string> get_server_and_clientID(int argc, char* argv[]);
-
 
     /**
      * @brief Gets the current Quality of Service (QoS) level.
@@ -178,10 +165,8 @@ public:
     const std::unique_ptr<mqtt::topic> &getSubscribeTopic() const;
 
     /**
-     * @brief returns whether a new message has been received or not.
-     * @return 1 if a new message has been received, 0 otherwise.
      */
-    int new_message_received() const;
+    void wait_new_message();
 
 private:
 

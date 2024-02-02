@@ -1,6 +1,5 @@
 #include <iostream>
 
-
 #include <boost/property_tree/json_parser.hpp>
 
 #include "mycallback.h"
@@ -9,17 +8,12 @@
 
 
 int main(int argc, char* argv[]) {
-
-
-
     std::string SERVER_ADDRESS,CLIENT_ID ;
 
     std::tie(SERVER_ADDRESS, CLIENT_ID) = Client::get_server_and_clientID(argc, argv);
 
     Client &my_client = Client::get_instance(SERVER_ADDRESS, CLIENT_ID);
 
-
-    //example of how to add and remove v2v topics
     my_client.add_v2v_subscribed_topic("rpi/00/position");
     my_client.add_v2v_subscribed_topic("rpi/03/position");
     my_client.remove_v2v_subscribed_topic("rpi/00/position");
@@ -31,25 +25,48 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    std::cout << "Entering While loop\n";
+    std::cout << "Client started successfully.\nEntering While loop\n";
 
+    //for testing purposes, to be removed later.
+    double vl = 0.0 ;
+    double vf = 0.0 ;
+    double xl = 0.0 ;
+    double yl = 0.0 ;
+    double xf = 0.0 ;
+    double yf = 0.0 ;
+
+    std::string sensors_topic("rpi/01/sensors");
+    std::string local_control_message;
 
     while (true) {
+        std::ostringstream oss;
+        boost::property_tree::ptree sensors;
+        boost::property_tree::ptree acions;
+        my_client.wait_new_message();
 
-        if (my_client.new_message_received()) {
+        local_control_message = my_client.get_message(sensors_topic);
 
-            //below is example of how to get the message from the topic
-            // control topic is on mycallback.h
-            std::string sensor_topic1 = sensor_topic;
-            std::string message = my_client.get_message(sensor_topic1);
+        //control logic here (below is an example)
+        std::stringstream buffer(local_control_message);
 
-            //below is example of how to publish a message to a topic
-            std::cout << "Publishing message: " << message << std::endl;
-            my_client.proxy_publish(message);
+        boost::property_tree::json_parser::read_json(buffer, sensors);
 
+        vl = sensors.get<double>("vl");
+        vf = sensors.get<double>("vf");
+        xl = sensors.get<double>("xl");
+        yl = sensors.get<double>("yl");
+        xf = sensors.get<double>("xf");
+        yf = sensors.get<double>("yf");
 
+        acions.put("af", Control::getControl( xl, yl, xf, yf,vl, vf));
 
+        boost::property_tree::write_json(oss, acions);
 
+        std::cout <<"Publishing: "<< oss.str() << std::endl;
+
+        if (my_client.proxy_publish(oss.str()) != CONNECTION_STATUS::SUCCESS) {
+            std::cout << "publishing failed" << std::endl;
+            exit(1);
         }
     }
 }

@@ -1,11 +1,11 @@
-//
-// Created by kareem on 12/4/23.
-//
-
 #ifndef HARMONY_RPI_MYCALLBACK_H
 #define HARMONY_RPI_MYCALLBACK_H
 #include "config.h"
 #include <mqtt/async_client.h>
+#include <cstdlib>
+#include <map>
+#include <mutex>
+#include <condition_variable>
 
 const std::string empty_string = "{}";
 
@@ -17,7 +17,9 @@ public:
 
     int received_messages = 0;
     int delivered_messages = 0;
-    int received_flag = 0;
+    bool received_flag = false;
+    std::mutex mtx;
+    std::condition_variable cv;
     std::map <std::string,std::string> messages;
 
     mycallback(){
@@ -25,7 +27,8 @@ public:
         messages[sensor_topic] = empty_string;
     }
 
-     std::string get_message(const std::string &topic);
+    std::string get_message(const std::string &topic);
+    void wait_new_message(void);
 private:
 
     void connected(const std::string& cause) override ;
@@ -35,8 +38,6 @@ private:
     void message_arrived(mqtt::const_message_ptr msg) override;
 
     void delivery_complete(mqtt::delivery_token_ptr token) override;
-
-
 };
 
 
