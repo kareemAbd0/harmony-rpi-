@@ -1,7 +1,7 @@
 #include <mqtt/async_client.h>
 #include <memory>
 #include "mycallback.h"
-#include "Client.h"
+#include "client.h"
 
 Client::Client(const std::string& server_address, const std::string& client_id) :
     cli(server_address, client_id),
