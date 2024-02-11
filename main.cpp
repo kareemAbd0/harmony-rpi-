@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "mycallback.h"
-#include "Client.h"
+#include "client.h"
 #include "control.h"
 
 
